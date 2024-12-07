@@ -262,6 +262,7 @@
 import React, { useRef, useState } from "react";
 import {
   createUserWithEmailAndPassword,
+  auth,
   updateProfile,
   addDoc,
   collection,
@@ -269,76 +270,96 @@ import {
   ref,
   uploadBytes,
   getDownloadURL,
-  auth,
   db,
   GoogleAuthProvider,
   GithubAuthProvider,
   signInWithPopup,
 } from "../../../FirebaseConfig/Firebase.js";
+
 import { useNavigate } from "react-router-dom";
 
 function Signup() {
   const email = useRef();
   const password = useRef();
-  const fullName = useRef();
+  const FirstName = useRef();
+  const Lstname = useRef();
   const file = useRef();
   const navigate = useNavigate();
   const [warning, setWarning] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSocialLogin = (providerInstance) => {
-    signInWithPopup(auth, providerInstance)
+  const handleSocialLogin = (Provider) => {
+    const provider = new Provider();
+    signInWithPopup(auth, provider)
       .then(() => navigate("/"))
       .catch(() => setWarning("Error signing in with social account."));
   };
 
   const handleSignup = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setWarning("");
+    setLoading(true);
 
-    const userEmail = email.current.value;
-    const userPassword = password.current.value;
-    const userFullName = fullName.current.value;
+    const userEmail = email.current.value.trim();
+    const userPassword = password.current.value.trim();
+    const firstName = FirstName.current.value.trim();
+    const lastName = Lstname.current.value.trim();
     const userFile = file.current.files[0];
 
-    if (!userEmail || !userPassword || !userFullName || !userFile) {
-      setWarning("All fields are required, including profile picture.");
+    if (!userEmail || !userPassword || !firstName || !lastName) {
+      setWarning("Please fill in all fields.");
+      setLoading(false);
+      return;
+    }
+
+    if (!userFile) {
+      setWarning("Please add your profile picture.");
       setLoading(false);
       return;
     }
 
     try {
+      // Create user
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         userEmail,
         userPassword
       );
+      const user = userCredential.user;
+
+      // Upload profile picture
       const storageRef = ref(storage, `profilePic/${userFile.name}`);
       await uploadBytes(storageRef, userFile);
-      const imageUrl = await getDownloadURL(storageRef);
+      const photoURL = await getDownloadURL(storageRef);
 
-      await updateProfile(userCredential.user, {
-        displayName: userFullName,
-        photoURL: imageUrl,
+      // Update profile
+      await updateProfile(user, {
+        displayName: `${firstName} ${lastName}`,
+        photoURL,
       });
 
+      // Add user data to Firestore
       await addDoc(collection(db, "userData"), {
         email: userEmail,
-        fullname: userFullName,
-        image: imageUrl,
-        uid: userCredential.user.uid,
+        firstName,
+        lastName,
+        photoURL,
+        uid: user.uid,
       });
 
       navigate("/");
     } catch (error) {
-      const errorCode = error.code;
-      if (errorCode === "auth/email-already-in-use") {
-        setWarning("Email already in use. Please use a different email.");
-      } else if (errorCode === "auth/weak-password") {
-        setWarning("Weak password. Use at least 6 characters.");
+      // Handle specific Firebase errors
+      if (error.code === "auth/email-already-in-use") {
+        setWarning(
+          "This email is already in use. Please use a different email."
+        );
+      } else if (error.code === "auth/weak-password") {
+        setWarning("Password is too weak. Please use a stronger password.");
+      } else if (error.code === "auth/invalid-email") {
+        setWarning("Invalid email format. Please enter a valid email.");
       } else {
-        setWarning("Signup failed. Please try again.");
+        setWarning("Error during signup: " + error.message);
       }
     } finally {
       setLoading(false);
@@ -357,16 +378,25 @@ function Signup() {
             <input
               type="file"
               ref={file}
-              className="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-700 placeholder-gray-400 sm:text-sm px-4 py-2"
+              className="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium">Full Name</label>
+            <label className="block text-sm font-medium">First Name</label>
             <input
               type="text"
-              ref={fullName}
-              className="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-700 placeholder-gray-400 sm:text-sm px-4 py-2"
-              placeholder="Full Name"
+              ref={FirstName}
+              className="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
+              placeholder="Enter First Name"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium">Last Name</label>
+            <input
+              type="text"
+              ref={Lstname}
+              className="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
+              placeholder="Enter Last Name"
             />
           </div>
           <div>
@@ -374,7 +404,7 @@ function Signup() {
             <input
               type="email"
               ref={email}
-              className="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-700 placeholder-gray-400 sm:text-sm px-4 py-2"
+              className="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
               placeholder="Email"
             />
           </div>
@@ -383,16 +413,9 @@ function Signup() {
             <input
               type="password"
               ref={password}
-              className="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-700 placeholder-gray-400 sm:text-sm px-4 py-2"
+              className="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
               placeholder="Password"
             />
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <input type="checkbox" id="terms" />
-            <label htmlFor="terms" className="text-sm">
-              Agree to <a href="#terms">Terms</a>
-            </label>
           </div>
           {warning && <p className="text-red-500 text-sm">{warning}</p>}
           <button
@@ -406,42 +429,15 @@ function Signup() {
         <p className="text-center text-black pt-3 text-1xl">OR</p>
         <div className="mt-4">
           <button
-            onClick={() => loginAuth(GoogleAuthProvider)}
-            type="button"
+            onClick={() => handleSocialLogin(GoogleAuthProvider)}
             className="w-full flex items-center justify-center bg-red-500 text-white py-2 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 shadow-lg"
           >
-            <svg
-              className="h-5 w-5 mr-2"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="white"
-            >
-              <path d="M21.35 11.1h-9.2v2.8h5.28c-.24 1.33-.97 2.45-2.07 3.2v2.66h3.35c1.96-1.8 3.12-4.46 3.12-7.7 0-.84-.1-1.66-.28-2.44z" />
-              <path d="M12.15 21.92c2.26 0 4.17-.75 5.56-2.02l-3.36-2.66c-.64.43-1.45.68-2.32.68-1.79 0-3.31-1.21-3.86-2.83H4.69v2.8c1.4 2.76 4.33 4.73 7.46 4.73z" />
-              <path d="M8.29 13.08c-.18-.54-.29-1.12-.29-1.74 0-.62.11-1.2.29-1.74V6.8h-3.6c-.78 1.51-1.22 3.22-1.22 5.08s.44 3.57 1.22 5.08z" />
-              <path d="M12.15 4.92c1.24 0 2.35.43 3.23 1.28l2.44-2.44c-1.5-1.36-3.41-2.16-5.67-2.16-3.13 0-6.06 1.77-7.46 4.73l3.6 2.8c.55-1.62 2.07-2.83 3.86-2.83z" />
-            </svg>
-            Sign up with Google
-          </button>{" "}
-          <br />
-          <button
-            type="button"
-            onClick={() => loginAuth(GithubAuthProvider)}
-            className="w-full flex items-center justify-center bg-gray-800 text-white py-2 rounded-md hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 shadow-lg"
-          >
-            <svg
-              className="h-5 w-5 mr-2"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="white"
-            >
-              <path d="M12 .5a12 12 0 00-3.8 23.4c.6.1.8-.2.8-.6v-2.3c-3.2.7-3.8-1.5-3.8-1.5-.5-1.3-1.2-1.6-1.2-1.6-1-1 .1-1 .1-1 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1 2.8.7.1-.7.4-1 1.1-1.3-2.5-.3-5.1-1.3-5.1-5.9 0-1.3.5-2.5 1.2-3.4-.1-.3-.5-1.4.1-3 0 0 1-.3 3.4 1.2a11.6 11.6 0 016.2 0c2.3-1.5 3.4-1.2 3.4-1.2.6 1.6.2 2.7.1 3 .8.9 1.2 2.1 1.2 3.4 0 4.6-2.6 5.6-5.1 5.9.4.3.8.9.8 1.8v2.7c0 .4.2.8.8.6A12 12 0 0012 .5z" />
-            </svg>
-            Sign up with GitHub
+            Sign Up with Google
           </button>
         </div>
       </div>
     </div>
   );
 }
+
 export default Signup;
