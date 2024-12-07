@@ -1,8 +1,27 @@
 // export default Navbar;
 import React, { useState, useEffect } from "react";
 import { FaMapMarkerAlt } from "react-icons/fa";
+import {
+  UserCircleIcon,
+  Cog6ToothIcon,
+  InboxArrowDownIcon,
+  LifebuoyIcon,
+  PowerIcon,
+} from "@heroicons/react/24/solid";
 
 const Navbar = () => {
+  const profileMenuItems = [
+    { label: "My Profile", icon: UserCircleIcon },
+    { label: "Edit Profile", icon: Cog6ToothIcon },
+    { label: "Inbox", icon: InboxArrowDownIcon },
+    { label: "Help", icon: LifebuoyIcon },
+    { label: "Sign Out", icon: PowerIcon },
+  ];
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  const closeMenu = () => setIsMenuOpen(false);
+
   const [countries, setCountries] = useState([]);
   const [selectedCountry, setSelectedCountry] = useState("Pakistan");
 
@@ -95,9 +114,57 @@ const Navbar = () => {
 
             {/* Login and Sell Buttons */}
             <div className="flex items-center space-x-4 relative left-14">
-              <button className="text-teal-600 font-semibold px-4 py-2 rounded-lg border-2 border-teal-600 hover:bg-teal-600 hover:text-white shadow-md transition-all duration-300 ease-in-out hover:scale-105">
-                Login
-              </button>
+              <div className="relative">
+                {/* Avatar Button */}
+                <button
+                  onClick={toggleMenu}
+                  className="flex items-center rounded-full focus:outline-none"
+                >
+                  <div className="w-10 h-10">
+                    <img
+                      src="https://docs.material-tailwind.com/img/face-2.jpg"
+                      alt="User Avatar"
+                      className="w-full h-full rounded-full border-2 border-gray-300"
+                    />
+                  </div>
+                </button>
+
+                {/* Dropdown Menu */}
+                <div
+                  className={`absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg transition-transform transform z-50 ${
+                    isMenuOpen
+                      ? "opacity-100 scale-100 translate-y-0"
+                      : "opacity-0 scale-95 -translate-y-2 pointer-events-none"
+                  }`}
+                >
+                  <ul className="py-1">
+                    {profileMenuItems.map(({ label, icon }, index) => {
+                      const isLastItem = index === profileMenuItems.length - 1;
+                      return (
+                        <li key={label}>
+                          <button
+                            onClick={
+                              isLastItem ? () => alert("Sign Out") : closeMenu
+                            }
+                            className={`flex items-center gap-3 px-4 py-2 text-sm w-full text-left ${
+                              isLastItem
+                                ? "text-red-500 hover:bg-red-100"
+                                : "text-gray-700 hover:bg-gray-100"
+                            }`}
+                          >
+                            {React.createElement(icon, {
+                              className: `h-5 w-5 ${
+                                isLastItem ? "text-red-500" : ""
+                              }`,
+                            })}
+                            {label}
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              </div>
 
               <button className="flex items-center space-x-2 px-6 py-3 rounded-full border-2 text-teal-600 font-semibold border-teal-600 shadow-lg hover:shadow-xl hover:scale-105 transition-transform duration-300 ease-in-out hover:bg-teal-600 hover:text-white">
                 <i className="fas fa-plus text-sm"></i>

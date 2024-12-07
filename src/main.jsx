@@ -4,8 +4,8 @@ import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 import Layout from "./layout.jsx";
 import Home from "../src/Home/Home.jsx";
 // import UserBlog from "./Pages/UserBlog.jsx";
-// import Signup from "./Pages/Signup.jsx";
-// import Login from "./Pages/Login.jsx";
+import Signup from "./Home/Signup/Signup.jsx";
+import Login from "./Home/Login/Login.jsx";
 // import AddBlog from "./Pages/AddBlog.jsx";
 
 // import Profile from "./Pages/Profile.jsx";
@@ -39,14 +39,14 @@ const router = createBrowserRouter([
   //   path: "singleblog/:id",
   //   element: <SingleBlog />,
   // },
-  // {
-  //   path: "login",
-  //   element: <Login />,
-  // },
-  // {
-  //   path: "signup",
-  //   element: <Signup />,
-  // },
+  {
+    path: "login",
+    element: <Login />,
+  },
+  {
+    path: "signup",
+    element: <Signup />,
+  },
   // {
   //   path: "input",
   //   element: <Input />,
