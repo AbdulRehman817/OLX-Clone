@@ -25,7 +25,7 @@ const Cards = (props) => {
           <h3 className="text-lg font-semibold text-gray-800">{props.price}</h3>
           <button
             className={`rounded-full p-2 transition-colors ${
-              isFavourite ? "bg-gray-200 text-red-500" : "bg-red-500 text-white"
+              isFavourite ? "bg-red-500 text-white" : "bg-gray-200 text-red-500"
             }`}
             onClick={toggleFavourite}
           >
