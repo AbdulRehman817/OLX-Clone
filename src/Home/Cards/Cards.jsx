@@ -10,7 +10,9 @@ const Cards = (props) => {
   return (
     <div className="max-w-sm mx-auto mt-10 shadow-lg rounded-lg overflow-hidden">
       <div>
-        <h2>{props.category}</h2>
+        {/* <h2 className="">
+          {props.category}
+        </h2> */}
       </div>
       <div className="relative">
         <img

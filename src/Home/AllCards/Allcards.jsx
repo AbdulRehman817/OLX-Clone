@@ -1,110 +1,67 @@
-// import React from "react";
-// import { useState, useEffect } from "react";
-// import Cards from "../Cards/Cards";
-// import axios from "axios";
-
-// const Allcards = () => {
-//   const [data, setData] = useState();
-
-//   useEffect(() => {
-//     axios
-//       .get("https://fakestoreapi.com/products")
-//       .then((res) => {
-//         console.log(res.data);
-//         setData(res.data); // Access the `data` property of the response
-//       })
-//       .catch((error) => console.log(error));
-//   }, []);
-//   return (
-//     <div className="flex ml-10 flex-wrap gap-20 mt-10">
-//       {data ? (
-//         data.map((item, index) => (
-//           <Cards
-//             key={index} // Add a unique key for each item in the list src=
-//             image={item.image}
-//             title={item.title}
-//             description={item.description}
-//             price={item.price}
-//             category={item.category}
-//             // price={item.price}
-//             // id={item.id}
-//           ></Cards>
-//         ))
-//       ) : (
-//         <p>loading</p>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default Allcards;
-
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import Cards from "../Cards/Cards";
 import axios from "axios";
+import Cards from "../Cards/Cards";
+import { useNavigate } from "react-router-dom";
 
 const Allcards = () => {
-  const [data, setData] = useState([]);
-  const [visibleItems, setVisibleItems] = useState({});
   const navigate = useNavigate();
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios
-      .get("https://fakestoreapi.com/products")
-      .then((res) => {
-        const groupedData = res.data.reduce((acc, product) => {
-          if (!acc[product.category]) {
-            acc[product.category] = [];
-          }
-          acc[product.category].push(product);
-          return acc;
-        }, {});
-        setData(groupedData);
-        const initialVisibleItems = Object.keys(groupedData).reduce(
-          (acc, category) => {
-            acc[category] = 3;
-            return acc;
-          },
-          {}
-        );
-        setVisibleItems(initialVisibleItems);
-      })
-      .catch((error) => console.log(error));
+    const fetchProducts = async () => {
+      try {
+        const res = await axios.get(`https://dummyjson.com/products?limit=100`); // Fetch more products initially
+        setData(res.data.products);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        setLoading(false);
+      }
+    };
+    fetchProducts();
   }, []);
 
   const handleViewMore = (category) => {
-    navigate(`/category/${encodeURIComponent(category)}`); // Navigate to the category page
+    navigate(`/category/${encodeURIComponent(category)}`); // Navigate to category page
   };
 
+  const categories = [...new Set(data.map((item) => item.category))];
+
   return (
-    <div className="flex flex-col ml-10 mt-10 gap-20">
-      {Object.keys(data).length > 0 ? (
-        Object.entries(data).map(([category, items]) => (
-          <div key={category} className="mb-10">
-            <h2 className="text-xl font-bold mb-5">{category}</h2>
-            <div className="flex flex-wrap gap-10">
-              {items.slice(0, visibleItems[category]).map((item) => (
-                <Cards
-                  key={item.id}
-                  image={item.image}
-                  title={item.title}
-                  description={item.description}
-                  price={item.price}
-                  category={item.category}
-                />
-              ))}
+    <div className="bg-white">
+      {loading ? (
+        <p className="text-center text-xl">Loading...</p>
+      ) : (
+        categories.map((category) => (
+          <div key={category} className="ml-10 mt-10">
+            <div className="flex justify-between items-center mt-16">
+              <h2 className="text-[#002f34] text-[2rem] capitalize font-bold mb-5">
+                {category}
+              </h2>
+              <button
+                onClick={() => handleViewMore(category)}
+                className="text-blue-500 font-semibold text-sm hover:underline mr-10"
+              >
+                View more
+              </button>
             </div>
-            <button
-              className="mt-5 px-4 py-2 bg-blue-500 text-white rounded"
-              onClick={() => handleViewMore(category)}
-            >
-              View More
-            </button>
+            <div className="flex flex-wrap gap-10">
+              {data
+                .filter((item) => item.category === category)
+                .slice(0, 3)
+                .map((item) => (
+                  <Cards
+                    image={item.thumbnail}
+                    key={item.id}
+                    title={item.title}
+                    description={item.description}
+                    price={item.price}
+                  />
+                ))}
+            </div>
           </div>
         ))
-      ) : (
-        <p>Loading...</p>
       )}
     </div>
   );

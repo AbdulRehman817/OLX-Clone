@@ -10,13 +10,13 @@ const ProductCard = ({
   onChat,
 }) => {
   return (
-    <div className="bg-white shadow-lg rounded-lg border border-gray-200 p-4 flex items-center space-x-4">
+    <div className="bg-white shadow-xl rounded-xl border border-gray-200 p-4 flex items-center space-x-4">
       {/* Product Image */}
       <div className="relative">
         <img
           src={image}
           alt={title}
-          className="w-24 h-24 object-cover rounded-md"
+          className="w-24 h-24 object-cover rounded-lg"
         />
         <span className="absolute top-2 left-2 bg-yellow-400 text-white text-xs px-2 py-1 rounded">
           Featured

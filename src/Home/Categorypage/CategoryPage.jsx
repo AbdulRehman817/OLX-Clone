@@ -1,7 +1,7 @@
 // import React, { useState, useEffect } from "react";
 // import { useParams } from "react-router-dom";
 // import axios from "axios";
-// import Cards from "../Cards/Cards";
+// import ProductCard from "../ProductCard/ProductCard";
 
 // const CategoryPage = () => {
 //   const { category } = useParams(); // Get category from route
@@ -9,29 +9,42 @@
 
 //   useEffect(() => {
 //     axios
-//       .get("https://fakestoreapi.com/products")
+//       .get("https://dummyjson.com/products")
 //       .then((res) => {
 //         // Filter products of the specific category
-//         const filteredProducts = res.data.filter(
+//         const filteredProducts = res.data.products.filter(
 //           (item) => item.category === category
 //         );
 //         setProducts(filteredProducts);
+//         console.log(filteredProducts);
 //       })
 //       .catch((error) => console.log(error));
 //   }, [category]);
 
+//   const handleCall = () => {
+//     alert("Call button clicked!");
+//   };
+
+//   const handleChat = () => {
+//     alert("Chat button clicked!");
+//   };
+
 //   return (
-//     <div className="flex flex-wrap gap-10 ml-10 mt-10">
-//       <h1 className="text-2xl font-bold mb-5">Products in "{category}"</h1>
+//     <div className=" flex flex-col flex-wrap gap-1 bg-white m-[1px] p-[20px]">
+//       <h1 className="text-4xl font-bold mb-5 tracking-tighter	text-[#002f34] text-center">
+//         {category}
+//       </h1>
 //       {products.length > 0 ? (
 //         products.map((item) => (
-//           <Cards
+//           <ProductCard
 //             key={item.id}
-//             image={item.image}
+//             image={item.thumbnail}
+//             price={`$${item.price}`}
 //             title={item.title}
-//             description={item.description}
-//             price={item.price}
-//             category={item.category}
+//             location="Unknown Location" // Replace with real data if available
+//             time="Just now" // Replace with real data if available
+//             onCall={handleCall}
+//             onChat={handleChat}
 //           />
 //         ))
 //       ) : (
@@ -42,26 +55,37 @@
 // };
 
 // export default CategoryPage;
+
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import ProductCard from "../ProductCard/ProductCard";
 
 const CategoryPage = () => {
-  const { category } = useParams(); // Get category from route
+  const { category } = useParams();
   const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    axios
-      .get("https://fakestoreapi.com/products")
-      .then((res) => {
-        // Filter products of the specific category
-        const filteredProducts = res.data.filter(
-          (item) => item.category === category
-        );
-        setProducts(filteredProducts);
-      })
-      .catch((error) => console.log(error));
+    const fetchProductsByCategory = async () => {
+      try {
+        setLoading(true);
+        const res = await axios.get(
+          `https://dummyjson.com/products/category/${encodeURIComponent(
+            category
+          )}`
+        ); // Fetch products for the specific category
+        setProducts(res.data.products);
+        setLoading(false);
+      } catch (err) {
+        console.error("Error fetching category products:", err);
+        setError("Failed to load products. Please try again later.");
+        setLoading(false);
+      }
+    };
+
+    fetchProductsByCategory();
   }, [category]);
 
   const handleCall = () => {
@@ -73,23 +97,31 @@ const CategoryPage = () => {
   };
 
   return (
-    <div className="flex flex-col flex-wrap gap-10 ml-10 mt-10 bg-white">
-      <h1 className="text-2xl font-bold mb-5">Products in "{category}"</h1>
-      {products.length > 0 ? (
+    <div className="flex flex-col flex-wrap gap-1 bg-white m-[1px] p-[20px]">
+      <h1 className="text-4xl font-bold mb-5 tracking-tighter text-[#002f34] text-center">
+        {category}
+      </h1>
+      {loading ? (
+        <div className="flex justify-center items-center h-screen">
+          <span className="loading loading-spinner text-info w-28"></span>
+        </div>
+      ) : error ? (
+        <p className="text-center text-red-500">{error}</p>
+      ) : products.length > 0 ? (
         products.map((item) => (
           <ProductCard
             key={item.id}
-            image={item.image}
+            image={item.thumbnail}
             price={`$${item.price}`}
             title={item.title}
-            location="Unknown Location" // Replace with real data if available
-            time="Just now" // Replace with real data if available
+            location="Unknown Location"
+            time="Just now"
             onCall={handleCall}
             onChat={handleChat}
           />
         ))
       ) : (
-        <p>No products found in this category.</p>
+        <p className="text-center">No products found in this category.</p>
       )}
     </div>
   );
