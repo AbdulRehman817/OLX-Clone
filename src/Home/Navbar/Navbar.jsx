@@ -52,7 +52,7 @@ const Navbar = () => {
   }, []);
 
   return (
-    <div className="bg-white shadow py-2">
+    <div className="bg-white shadow pt-5 pb-10">
       <div className="container mx-auto flex justify-between items-center">
         {/* Logo */}
         <div className="text-2xl font-bold text-gray-800">OLX</div>
@@ -61,9 +61,9 @@ const Navbar = () => {
         <div className="flex items-center space-x-4">
           {/* Location Dropdown */}
           <div className="flex items-center space-x-2">
-            <FaMapMarkerAlt className="text-gray-600" />
+            <FaMapMarkerAlt className="text-gray-600 relative left-8" />
             <select
-              className="border rounded-lg px-3 py-2 bg-white"
+              className="border rounded-lg pl-8 py-2 bg-white w-72"
               value={selectedCountry}
               onChange={(e) => setSelectedCountry(e.target.value)}
             >
@@ -82,7 +82,7 @@ const Navbar = () => {
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               placeholder="Find Cars, Phones, and more..."
-              className="px-4 py-2 w-72 bg-white"
+              className="px-4 py-2 w-96 bg-white"
             />
             <button className="bg-teal-900 text-white px-4 h-[40px]">
               <svg
@@ -112,23 +112,56 @@ const Navbar = () => {
               <img
                 src={image || "default-avatar.png"}
                 alt="User Avatar"
-                className="w-10 h-10 object-cover border"
+                className="w-12 h-12 object-cover"
               />
             </button>
             {isMenuOpen && (
-              <ul className="absolute right-0 bg-white shadow rounded-lg p-2">
-                <li className="px-4 py-2">{fullname || "Guest"}</li>
-                <li className="px-4 py-2 cursor-pointer hover:bg-gray-200">
-                  Logout
+              <ul className="absolute right-0 mt-2 w-56 bg-white shadow-xl rounded-2xl py-4 z-20 transform scale-95 opacity-0 transition-transform duration-300 ease-out hover:scale-100 hover:opacity-100">
+                <li className="px-4 py-3 rounded-t-lg bg-gradient-to-r from-gray-50 to-white text-gray-800 font-medium shadow-inner border-b border-gray-200">
+                  {fullname || "Guest"}
+                </li>
+                <li className="px-4 py-3 cursor-pointer rounded-lg flex items-center space-x-2 hover:bg-teal-100 hover:text-teal-900 hover:shadow-md transform hover:scale-105 transition-transform duration-200 ease-in-out text-gray-700">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 text-teal-500"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                  <span>Logout</span>
+                </li>
+                <li className="px-4 py-3 cursor-pointer rounded-lg flex items-center space-x-2 hover:bg-teal-100 hover:text-teal-900 hover:shadow-md transform hover:scale-105 transition-transform duration-200 ease-in-out text-gray-700">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 text-teal-500"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 3v18l15-9-15-9z"
+                    />
+                  </svg>
+                  <span>Favorite</span>
                 </li>
               </ul>
             )}
           </div>
 
           {/* Sell Button */}
-          <button className="bg-gradient-to-r from-teal-500 to-teal-700 text-white px-4 py-2 rounded-lg">
-            <FontAwesomeIcon icon={faPlus} />
-            <span className="ml-2">SELL</span>
+          <button className="bg-gradient-to-r from-teal-500 to-teal-700 text-white pr-3 pl-0 py-2 rounded-lg">
+            <FontAwesomeIcon icon={faPlus} className="relative left-4" />
+            <span className="ml-[30px]">SELL</span>
           </button>
         </div>
       </div>
