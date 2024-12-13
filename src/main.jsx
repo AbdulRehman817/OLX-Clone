@@ -6,7 +6,8 @@ import Home from "../src/Home/Home.jsx";
 // import UserBlog from "./Pages/UserBlog.jsx";
 import Signup from "./Home/Signup/Signup.jsx";
 import Login from "./Home/Login/Login.jsx";
-import CategoryPage from "./Home/Categorypage/CategoryPage.jsx";
+import CategoryPage from "./Home/Categorypage/Categorypage.jsx";
+import Favourites from "./Home/Favourites/Favourites.jsx";
 // import AddBlog from "./Pages/AddBlog.jsx";
 
 // import Profile from "./Pages/Profile.jsx";
@@ -26,14 +27,11 @@ const router = createBrowserRouter([
         path: "/category/:category",
         element: <CategoryPage />,
       },
-      // {
-      //   path: "userblog",
-      //   element: <UserBlog />,
-      // },
-      // {
-      //   path: "profile",
-      //   element: <Profile />,
-      // },
+
+      {
+        path: "favourites",
+        element: <Favourites />,
+      },
     ],
   },
   // {

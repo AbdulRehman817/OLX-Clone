@@ -1,23 +1,75 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import {
+  auth,
+  db,
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  where,
+  deleteDoc,
+  doc,
+  onAuthStateChanged,
+} from "../../../FirebaseConfig/Firebase.js";
 
 const Cards = (props) => {
   const [isFavourite, setIsFavourite] = useState(false);
+  const [userId, setUserId] = useState(null);
 
-  const toggleFavourite = () => {
+  // Fetch the authenticated user's UID
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserId(user.uid);
+      } else {
+        setUserId(null);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const toggleFavourite = async () => {
+    if (!userId) {
+      console.log("User not authenticated");
+      return;
+    }
+
     setIsFavourite(!isFavourite);
+
+    if (!isFavourite) {
+      try {
+        const docRef = await addDoc(collection(db, "favourites"), {
+          productId: userId,
+          title: props.title,
+          price: props.price,
+          image: props.image,
+        });
+        console.log("Item added to favourites with ID: ", docRef.id);
+      } catch (error) {
+        console.error("Error adding to favourites: ", error);
+      }
+    } else {
+      try {
+        const favoritesRef = collection(db, "favourites");
+        const q = query(favoritesRef, where("productId", "==", userId));
+        const snapshot = await getDocs(q);
+
+        if (snapshot.empty) {
+          console.log("No matching documents found to delete.");
+          return;
+        }
+      } catch (error) {
+        console.error("Error removing from favourites: ", error);
+      }
+    }
   };
 
   return (
     <div className="max-w-sm mx-auto mt-10 shadow-lg rounded-lg overflow-hidden">
-      <div>
-        {/* <h2 className="">
-          {props.category}
-        </h2> */}
-      </div>
       <div className="relative">
         <img
           src={props.image}
-          alt="Wooden House"
+          alt="Product"
           className="w-full h-48 object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent"></div>

@@ -31,7 +31,9 @@ const Allcards = () => {
   return (
     <div className="bg-white">
       {loading ? (
-        <p className="text-center text-xl">Loading...</p>
+        <div className="flex justify-center items-center h-screen">
+          <span className="loading loading-spinner text-info w-28"></span>
+        </div>
       ) : (
         categories.map((category) => (
           <div key={category} className="ml-10 mt-10">

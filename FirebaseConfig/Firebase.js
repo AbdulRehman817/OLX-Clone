@@ -11,6 +11,8 @@ import {
   getDoc,
   updateDoc,
   deleteDoc,
+  query,
+  where,
 } from "firebase/firestore";
 import {
   getStorage,
@@ -69,4 +71,6 @@ export {
   signInWithPopup,
   GoogleAuthProvider,
   GithubAuthProvider,
+  query,
+  where,
 };
